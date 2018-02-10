@@ -5,7 +5,7 @@ Django Agricultural IoT
 
 Built with Django, Jquery, Flot Charts, & Boostrap 3.
 
-Central storage for ioTank. 
+Central storage for [ioTank](https://github.com/objectsyndicate/ioTank). 
 
 # Typical uses,
 
