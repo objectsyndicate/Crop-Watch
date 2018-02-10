@@ -9,4 +9,6 @@ Central storage for [ioTank](https://github.com/objectsyndicate/ioTank).
 
 # Typical uses,
 
-Deploy on raspberry pi or ARM of your choice, configure ioTank to send data to the assigned IP.
+Used to power [ObjectSyndicate](https://my.objectsyndicate.com), a cloud based IoT server and notice system.
+
+Can also be deployed on raspberry pi or django compatible server of your choice.
