@@ -11,4 +11,4 @@ Central storage for [ioTank](https://github.com/objectsyndicate/ioTank).
 
 Used to power [ObjectSyndicate](https://my.objectsyndicate.com), a cloud based IoT server and notice system.
 
-Can also be deployed on raspberry pi or django compatible server of your choice.
+Can also be deployed on raspberry pi or django compatible server of your choice and interface with PLC for greenhouse automation.
