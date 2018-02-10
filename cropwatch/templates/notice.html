@@ -1,0 +1,71 @@
+{% extends "index.html" %}
+{% block head %}
+<script>
+$(document).ready(function() {
+});
+
+
+</script>
+{% endblock %}
+{% block body %}
+<div class="container-fluid">
+    <h1 class="page-header">Notices</h1>
+    <div class="row">
+        <div class="col-sm-8 col-sm-offset-2">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-envelope fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div class="huge">{{settings.email_daily}}</div>
+                            <div>Daily email remaining</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-8 col-sm-offset-2">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Last 15 days
+            </div>
+            <!-- /.panel-heading -->
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Queued</th>
+                            <th>Processed</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for notice, qs in final.items %}
+                        <tr>
+                            <td>{{ notice.timestamp }}</td>
+                            <td>{{ qs.date_done }}</td>
+                            <td>{{ notice.get_type_display }}</td>
+                            <td>{% if qs.result == "1" %}Sent {% endif %}
+                                {% if qs.result == '"queued"' %}Sent {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <!-- /.table-responsive -->
+            </div>
+            <!-- /.panel-body -->
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

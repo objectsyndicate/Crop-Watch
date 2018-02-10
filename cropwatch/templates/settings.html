@@ -1,0 +1,85 @@
+{% extends "index.html" %}
+
+{% load addcss %}
+
+{% block head %}
+
+
+{% endblock %}
+
+{% block body %}
+
+{% if errors == "EMAILDUP" %}
+email duplicate
+{% endif %}
+
+{% if form.errors %}
+<p>Check form</p>
+{% endif %}
+
+
+<div class="container-fluid">
+    <div class="hidden-lg hidden-md hidden-sm">
+        <br/><br/>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Settings</h3>
+                </div>
+                <div class="panel-body">
+
+
+                    <form method="POST" action="">
+                        {% csrf_token %}
+
+
+                        <div class="form-group">
+                            {{ email_form.email.errors }}
+                            <label for="{{ email_form.email.id_for_label }}">Email Address</label>
+                            {{ email_form.email|addcss:"form-control" }}
+                            <p class="text-danger">E-mail is used to recover your account password; change with great
+                                care.</p>
+
+                        </div>
+
+                        <div class="">
+                            {{ userprofileform.notify_iotank_emergency.errors }}
+                            <label for="{{ userprofileform.notify_iotank_emergency.id_for_label }}">Notify ioTank
+                                emergency </label>
+                            {{ userprofileform.notify_iotank_emergency|toggle:"toggle" }}
+                        </div>
+
+                        <div class="">
+                            {{ userprofileform.notify_email.errors }}
+                            <label for="{{ userprofileform.notify_email.id_for_label }}">Notify with Email </label>
+                            {{ userprofileform.notify_email|toggle:"toggle" }}
+                        </div>
+
+                        <div class="form-group">
+                            {{ userprofileform.timezone.errors }}
+                            <label for="{{ userprofileform.timezone.id_for_label }}">Timezone</label>
+                            {{ userprofileform.timezone|addcss:"form-control" }}
+
+                        </div>
+                        <input class="btn btn-primary" type="submit">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+
+
+
+
+
+
+
+

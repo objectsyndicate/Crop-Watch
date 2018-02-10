@@ -1,0 +1,40 @@
+{% extends "index.html" %}
+
+
+{% block head %}
+
+
+{% endblock %}
+
+{% block body %}
+
+{% if user.is_authenticated %}
+
+
+Go to <a href='/metrics/'>Metrics</a>
+
+
+{% else %}
+
+
+<div class="container">
+    <div class="header">
+        <h3 class="text-muted">Password reset done</h3>
+    </div>
+    <div class="row">
+        <!-- Display the success message on successful submission and validation
+             of the contact form data.
+         -->
+        <div class="alert alert-success">
+            Password reset done. Check your email for a password reset link.
+        </div>
+    </div>
+</div>
+
+
+{% endif %}
+
+
+{% endblock %}
+
+

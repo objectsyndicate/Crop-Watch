@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/media/favicon.ico">
+    <title>Crop🌱Watch</title>
+    <link rel="shortcut icon" type="image/png" href="/media/favicon.ico"/>
+    <script src="/media/jquery/dist/jquery.min.js"></script>
+    <script src="/media/bootstrap/dist/js/bootstrap.min.js"></script>
+    <link href="/media/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+    <link href="/media/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <script src="/media/js/bootstrap-toggle.min.js"></script>
+    <link href="/media/css/timeline.css" rel="stylesheet">
+    <link href="/media/css/sb-admin-2.css" rel="stylesheet">
+    <!-- Custom Fonts -->
+    <link href="/media/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <style>
+.page-header {
+padding-bottom: 9px;
+margin: 0px 0 20px;
+border-bottom: 1px solid #eee;
+}
+html {
+position: relative;
+min-height: 100%;
+}
+.footer {
+position: absolute;
+bottom: 0;
+width: 100%;
+/* Set the fixed height of the footer here */
+height: 60px;
+background-color: rgba(255, 255, 255, 0.7);
+}
+.footer-text {
+margin: 1.5em;
+bottom: 0;
+}
+body {
+font-family: 'PT Sans', sans-serif;
+margin-bottom: 60px;
+}
+.btn-primary{
+background-color: #4f5b62;
+border-color: #000a12;
+}
+.btn-primary:hover, .btn-primary:focus,  .btn-primary:active:focus, .btn-primary:active, .btn-primary.active, .open > .dropdown-toggle.btn-primary {
+background-color: #263238;
+border-color: #000a12;
+}
+.btn-primary:active, .btn-primary.active {
+background-color: #88b14b;
+border-color: #455925;
+}
+#page-wrapper {
+background: none;
+}
+.fa-inverse {
+color: #fff;
+}
+a.dropdown-toggle {
+color: #263238;
+}
+a.logo {
+position: relative;
+display: block;
+padding: 16px 15px;
+font-size: 2em;
+text-decoration: none;
+color: inherit;
+}
+.navbar-default {
+box-shadow: 0px 1px 2px #333;
+}
+.navbar-right {
+float: right !important;
+}
+textarea:focus, input:focus, .uneditable-input:focus {
+border-color: rgba(96,125,139, 0.8) !important;
+box-shadow: 0 1px 1px rgba(96,125,139, 0.075) inset, 0 0 8px rgba(96,125,139, 0.6) !important;
+outline: 0 none !important;
+}
+.page-header {
+padding-bottom: 9px;
+margin: 0px 0 0px;
+border-bottom: 1px solid #eee;
+}
+
+
+
+    </style>
+    {% block head %}
+    {% endblock %}
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet">
+</head>
+<body>
+<div id="wrapper">
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="navbar-header hidden-xs">
+            <a class="logo" href="/metrics">Crop🌱Watch</a>
+        </div>
+        <!-- /.navbar-header -->
+        <ul class="nav navbar-top-links navbar-right">
+            {% if user.is_authenticated %}
+            <li class="dropdown">
+                <a class="dropdown-toggle" href="/metrics/">
+                    <h4><i class="fa fa-lg fa-bar-chart-o"></i></h4>
+                </a>
+            </li>
+            <li class="dropdown">
+                <a class="dropdown-toggle" href="/notices/">
+                    <h4><i class="fa fa-lg fa-envelope-o"></i></h4>
+                </a>
+            </li>
+            <li class="dropdown">
+                <a class="dropdown-toggle" href="/devices/">
+                    <h4><i class="fa fa-lg fa-cubes"></i></h4>
+                </a>
+            </li>
+            {% endif %}
+            <li class="dropdown">
+                {% if user.is_authenticated %}
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                    {% if request.user.first_name %}
+                    <h4>
+                        {{ request.user.first_name }}</h4>
+                    {% else %}
+                    <h4>
+                        {{ request.user.username}}</h4>
+                    {% endif %}
+                </a>
+                {% else %}
+                <a class="dropdown-toggle" href="/login/">
+                    <h4>Login</h4>
+                </a>
+                {% endif %}
+                <ul class="dropdown-menu dropdown-user">
+                    {% if user.is_superuser %}
+                    <li><a href="/admin/"><i class="fa fa-lg fa-star fa-spin fa-fw" aria-hidden="true"></i> Admin</a>
+                    </li>
+                    {% else %}
+                    {% endif %}
+                    {% if user.is_authenticated %}
+                    <li><a href="/settings/"><i class="fa fa-lg fa-gears fa-fw"></i> Settings</a></li>
+                    <li><a href="/logout/"><i class="fa fa-lg fa-sign-out fa-fw"></i> Logout</a></li>
+                    {% else %}
+                    <li><a href="/login/"><i class="fa fa-lg fa-sign-out fa-fw"></i> Login</a></li>
+                    {% endif %}
+                </ul>
+                <!-- /.dropdown-user -->
+                <!-- /.dropdown -->
+            </li>
+        </ul>
+        <!-- /.navbar-top-links -->
+    </nav>
+</div>
+<div id="page-wrapper">
+    {% if messages %}
+    {% for message in messages %}
+    {% if message.tags %}
+    {% if message.tags == 'safe error' %}
+    <div class="alert alert-danger alert-dismissable">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        {% else %}
+        <div class="alert alert-success alert-dismissable">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            {% endif %}
+            {% endif %}
+            {{ message|safe }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        <div class="hidden-lg hidden-md hidden-sm">
+            <br/><br/>
+        </div>
+        {% block body %}
+        {% endblock %}
+    </div>
+    <!-- /#page-wrapper -->
+</div>
+<script src="/media/js/sb-admin-2.js"></script>
+<footer class="footer">
+    <div class="footer-text">
+        <p class="text-muted">Created by <a href="https://www.objectsyndicate.com">Object Syndicate LLC.</a> For support
+            contact us on<a href="https://github.com/objectsyndicate/"><i class="fa fa-github fa-fw"></i>GitHub</a>.
+            Released under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a> license. </p>
+    </div>
+</footer>
+</body>
+</html>

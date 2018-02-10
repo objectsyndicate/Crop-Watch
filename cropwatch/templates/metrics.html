@@ -1,0 +1,465 @@
+{% extends "index.html" %}
+{% load addcss %}
+{% load imgaccept %}
+{% block head %}
+<Style>
+.well{
+background-color: #fff;
+}
+.col-centered{
+float: none;
+margin: 0 auto;
+}
+
+
+
+</Style>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.0.0/fullcalendar.min.css' rel='stylesheet'/>
+<script src='/media/lib/moment.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.0.0/fullcalendar.min.js'></script>
+<script language="javascript" type="text/javascript" src="/media/flot/jquery.flot.js"></script>
+<script language="javascript" type="text/javascript" src="/media/flot/jquery.flot.time.js"></script>
+<script language="javascript" type="text/javascript" src="/media/flot/jquery.flot.resize.min.js"></script>
+<script type="text/javascript" src="/media/flot/jquery.flot.autoMarkings.js"></script>
+<script type="text/javascript">
+$(function () {
+    $('#calendar').fullCalendar({
+        header: {
+            left: 'title',
+            center: '',
+            right: 'prev,next'
+        },
+        height: 'auto',
+        editable: false,
+        eventLimit: false,
+        timezone: 'local',
+        events: {% autoescape off %} {{ cal_json }} {% endautoescape %},
+        views: {},
+        defaultView: 'month',
+        selectHelper: true,
+        {% if not bots %} {% else %}
+        dayClick: function (date, jsEvent, view) {
+            var d = new Date()
+            var n = d.getTimezoneOffset();
+            var start = date + (n * 60000)
+            var end = date.endOf('day') + (n * 60000) {% for bot, form in bot_forms.items %}
+            $("#date-{{ forloop.counter }}").text(date.format("MMM Do"));
+
+            function onDataReceived{{ forloop.counter }}(series) {
+                $.plot("#t-{{bot}}", [{ data: series.data.t1, label: "Temp 1 ", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#EF562D' },
+                    { data: series.data.t2, label: "Temp 2", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#F6D258' }, ], {
+                    xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+                    grid: { hoverable: true, clickable: true },
+                });
+                $.plot("#h-{{bot}}", [
+                    {
+                        data: series.data.h,
+                        label: "Humidity",
+                        lines: { show: true, fill: false, fillColor: "#FF0" },
+                        points: { show: true },
+                        color: "rgb(100, 181, 246)",
+                        autoMarkings: {
+                            enabled: true,
+                            showMinMax: true,
+                            showAvg: true,
+                            twelveHourClock: true,
+                            avgcolor: "rgb(100, 181, 246)"
+                        }
+                    }, ], {
+                    yaxis: { min: 0, max: 80 },
+                    xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+                    grid: { hoverable: true, clickable: true },
+                });
+                $.plot("#u-{{bot}}", [{ data: series.data.uv, label: "UV Index ", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#673ab7' }, ], {
+                    yaxis: { min: 0 },
+                    xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+                    grid: { hoverable: true, clickable: true },
+                });
+                $.plot("#l-{{bot}}", [{ data: series.data.l, label: "Lux ", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#90a4ae' }, ], {
+                    xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+                    grid: { hoverable: true, clickable: true },
+                });
+            } // end
+            $.ajax({
+                url: "/api/flot/" + start + ":" + end + "/{{bot}}",
+                type: "GET",
+                dataType: "json",
+                success: onDataReceived{{ forloop.counter }}
+            }); {% endfor %}
+        },
+        {% endif %}
+        eventClick: function (event) {
+            $('#edit_' + event.id).modal('show');
+        },
+    });
+    $('#edit_event').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var recipient = button.data('whatever') // Extract info from data-* attributes
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        var modal = $(this)
+        reload_modal = modal.find('.modal-body').text()
+    })
+    $("#6hour").click(function () { {% if not bots %} {% else %}
+        var dateOffset = (60 * 60 * 1000) * 6; //6 hours
+        var d6 = new Date();
+        var n = d6.getTimezoneOffset();
+        var end = d6.valueOf();
+        d6.setTime(d6.getTime() - dateOffset);
+        var start = d6.valueOf(); {% for bot, form in bot_forms.items %}
+
+        function onDataReceived6h{{ forloop.counter }}(series) {
+            $.plot("#t-{{bot}}", [{ data: series.data.t1, label: "Temp 1 ", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#EF562D' },
+                { data: series.data.t2, label: "Temp 2", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#F6D258' }, ], {
+                xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+                grid: { hoverable: true, clickable: true },
+            });
+            $.plot("#h-{{bot}}", [
+                {
+                    data: series.data.h,
+                    label: "Humidity",
+                    lines: { show: true, fill: false, fillColor: "#FF0" },
+                    points: { show: true },
+                    color: "rgb(100, 181, 246)",
+                    autoMarkings: {
+                        enabled: true,
+                        showMinMax: true,
+                        showAvg: true,
+                        twelveHourClock: true,
+                        avgcolor: "rgb(100, 181, 246)"
+                    }
+                }, ], {
+                yaxis: { min: 0, max: 80 },
+                xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+                grid: { hoverable: true, clickable: true },
+            });
+            $.plot("#u-{{bot}}", [{ data: series.data.uv, label: "UV Index ", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#673ab7' }, ], {
+                yaxis: { min: 0 },
+                xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+                grid: { hoverable: true, clickable: true },
+            });
+            $.plot("#l-{{bot}}", [{ data: series.data.l, label: "Lux ", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#90a4ae' }, ], {
+                xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+                grid: { hoverable: true, clickable: true },
+            });
+        }
+        $.ajax({
+            url: "/api/flot/" + start + ":" + end + "/{{bot}}",
+            type: "GET",
+            dataType: "json",
+            success: onDataReceived6h{{ forloop.counter }}
+        }); {% endfor %} {% endif %}
+    })
+    $("#12hour").click(function () { {% if not bots %} {% else %}
+        var dateOffset = (60 * 60 * 1000) * 16; //6 hours
+        var d6 = new Date();
+        var n = d6.getTimezoneOffset();
+        var end = d6.valueOf();
+        d6.setTime(d6.getTime() - dateOffset);
+        var start = d6.valueOf(); {% for bot, form in bot_forms.items %}
+
+        function onDataReceived6h{{ forloop.counter }}(series) {
+            $.plot("#t-{{bot}}", [{ data: series.data.t1, label: "Temp 1 ", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#EF562D' },
+                { data: series.data.t2, label: "Temp 2", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#F6D258' }, ], {
+                xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+                grid: { hoverable: true, clickable: true },
+            });
+            $.plot("#h-{{bot}}", [
+                {
+                    data: series.data.h,
+                    label: "Humidity",
+                    lines: { show: true, fill: false, fillColor: "#FF0" },
+                    points: { show: true },
+                    color: "rgb(100, 181, 246)",
+                    autoMarkings: {
+                        enabled: true,
+                        showMinMax: true,
+                        showAvg: true,
+                        twelveHourClock: true,
+                        avgcolor: "rgb(100, 181, 246)"
+                    }
+                }, ], {
+                yaxis: { min: 0, max: 80 },
+                xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+                grid: { hoverable: true, clickable: true },
+            });
+            $.plot("#u-{{bot}}", [{ data: series.data.uv, label: "UV Index ", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#673ab7' }, ], {
+                yaxis: { min: 0 },
+                xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+                grid: { hoverable: true, clickable: true },
+            });
+            $.plot("#l-{{bot}}", [{ data: series.data.l, label: "Lux ", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#90a4ae' }, ], {
+                xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+                grid: { hoverable: true, clickable: true },
+            });
+        }
+        $.ajax({
+            url: "/api/flot/" + start + ":" + end + "/{{bot}}",
+            type: "GET",
+            dataType: "json",
+            success: onDataReceived6h{{ forloop.counter }}
+        }); {% endfor %} {% endif %}
+    })
+    $("#24hour").click(function () { {% if not bots %} {% else %}
+        var dateOffset = (60 * 60 * 1000) * 24; //6 hours
+        var d6 = new Date();
+        var n = d6.getTimezoneOffset();
+        var end = d6.valueOf();
+        d6.setTime(d6.getTime() - dateOffset);
+        var start = d6.valueOf(); {% for bot, form in bot_forms.items %}
+
+        function onDataReceived6h{{ forloop.counter }}(series) {
+            $.plot("#t-{{bot}}", [{ data: series.data.t1, label: "Temp 1 ", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#EF562D' },
+                { data: series.data.t2, label: "Temp 2", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#F6D258' }, ], {
+                xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+                grid: { hoverable: true, clickable: true },
+            });
+            $.plot("#h-{{bot}}", [
+                {
+                    data: series.data.h,
+                    label: "Humidity",
+                    lines: { show: true, fill: false, fillColor: "#FF0" },
+                    points: { show: true },
+                    color: "rgb(100, 181, 246)",
+                    autoMarkings: {
+                        enabled: true,
+                        showMinMax: true,
+                        showAvg: true,
+                        twelveHourClock: true,
+                        avgcolor: "rgb(100, 181, 246)"
+                    }
+                }, ], {
+                yaxis: { min: 0, max: 80 },
+                xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+                grid: { hoverable: true, clickable: true },
+            });
+            $.plot("#u-{{bot}}", [{ data: series.data.uv, label: "UV Index ", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#673ab7' }, ], {
+                yaxis: { min: 0 },
+                xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+                grid: { hoverable: true, clickable: true },
+            });
+            $.plot("#l-{{bot}}", [{ data: series.data.l, label: "Lux ", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#90a4ae' }, ], {
+                xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+                grid: { hoverable: true, clickable: true },
+            });
+        }
+        $.ajax({
+            url: "/api/flot/" + start + ":" + end + "/{{bot}}",
+            type: "GET",
+            dataType: "json",
+            success: onDataReceived6h{{ forloop.counter }}
+        }); {% endfor %} {% endif %}
+    })
+});
+
+</script>
+{% endblock %}
+{% block body %}
+<div class="container-fluid">
+    <h1 class="page-header">Metrics</h1>
+    <div class="row">
+        <div class="col-lg-4">
+            <div class='well' id='calendar'>
+            </div>
+            <br/>
+            {% for item, form in feeding_schedules.items %}
+            <div class='col-lg-4'>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#edit_{{item.id}}"
+                        data-whatever="{{ item.id }}"><p class="fa fa-edit"></p> {{item.title}}
+                </button>
+            </div>
+            {% endfor %}
+            <br/>
+        </div>
+        <div class="col-lg-8">
+            {% if 0 > tier %}
+            <div class="alert alert-info">
+                <a href='/devices'>Create an ioTank</a> and use its token with the toolkit, andriod emulator, or
+                buy/build an ioTank to populate metrics.
+            </div>
+            {% else %}
+            {% if not bots %}
+            <div class="alert alert-info">
+                <a href='/devices'>Create an ioTank</a> and use its token with the toolkit, andriod emulator, or
+                buy/build an ioTank to populate metrics.
+            </div>
+            {% else %}
+            <!-- /.panel-heading -->
+            {% for bot, form in bot_forms.items %}
+            <script type="text/javascript">
+$(function () {
+    function onDataReceived{{ forloop.counter }}(series) {
+        $.plot("#t-{{bot}}", [{ data: series.data.t1, label: "Temp 1 ", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#EF562D' },
+            { data: series.data.t2, label: "Temp 2", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#F6D258' }, ], {
+            xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+            grid: { hoverable: true, clickable: true },
+        });
+        $.plot("#h-{{bot}}", [
+            {
+                data: series.data.h,
+                label: "Humidity",
+                lines: { show: true, fill: false, fillColor: "#FF0" },
+                points: { show: true },
+                color: "rgb(100, 181, 246)",
+                autoMarkings: {
+                    enabled: true,
+                    showMinMax: true,
+                    showAvg: true,
+                    twelveHourClock: true,
+                    avgcolor: "rgb(100, 181, 246)"
+                }
+            }, ], {
+            yaxis: { min: 0, max: 80 },
+            xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+            grid: { hoverable: true, clickable: true },
+        });
+        $.plot("#u-{{bot}}", [{ data: series.data.uv, label: "UV Index ", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#673ab7' }, ], {
+            yaxis: { min: 0 },
+            xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+            grid: { hoverable: true, clickable: true },
+        });
+        $.plot("#l-{{bot}}", [{ data: series.data.l, label: "Lux ", lines: { show: true, fill: false, fillColor: "#FF0" }, points: { show: true }, color: '#90a4ae' }, ], {
+            xaxis: { mode: "time", timezone: "browser", timeformat: "%m/%d-%l:%M%p" },
+            grid: { hoverable: true, clickable: true },
+        });
+    }
+    var d = new Date()
+    var n = d.getTimezoneOffset();
+    var start = moment().startOf('day')
+    var end = moment().endOf('day')
+    $.ajax({
+        url: "/api/flot/" + start + ":" + end + "/{{bot}}",
+        type: "GET",
+        dataType: "json",
+        success: onDataReceived{{ forloop.counter }}
+    });
+    $("<div id='tooltip'></div>").css({
+        position: "absolute",
+        display: "none",
+        border: "1px solid #fdd",
+        padding: "2px",
+        "background-color": "#fee",
+        opacity: 0.80
+    }).appendTo("body");
+    $("#t-{{bot}}").bind("plothover", function (event, pos, item) {
+        if(item) {
+            var x = item.datapoint[0].toFixed(2),
+                y = item.datapoint[1].toFixed(2),
+                d = new Date(parseInt(x, 10));
+            if(item.seriesIndex == 0) {
+                $("#tooltip").html(item.series.label + ": " + y + "° " + d.toLocaleTimeString("en-us"))
+                    .css({ top: item.pageY + 5, left: item.pageX + 5, "background-color": "#ffebee", border: "1px solid #b71c1c", })
+                    .fadeIn(200);
+            }
+            if(item.seriesIndex == 1) {
+                $("#tooltip").html(item.series.label + ": " + Math.round(y) + "° " + d.toLocaleTimeString("en-us"))
+                    .css({ top: item.pageY + 5, left: item.pageX + 5, "background-color": "#fff8e1", border: "1px solid #ff6f00", })
+                    .fadeIn(200);
+            }
+        }
+        else {
+            $("#tooltip").hide();
+        }
+    });
+    $("#h-{{bot}}").bind("plothover", function (event, pos, item) {
+        if(item) {
+            var x = item.datapoint[0].toFixed(2),
+                y = item.datapoint[1].toFixed(2),
+                d = new Date(parseInt(x, 10));
+            if(item.seriesIndex == 0) {
+                $("#tooltip").html(item.series.label + ": " + Math.round(y) + "% " + d.toLocaleTimeString("en-us"))
+                    .css({ top: item.pageY + 5, left: item.pageX + 5, "background-color": "#e3f2fd", border: "1px solid #0d47a1", })
+                    .fadeIn(200);
+            }
+        }
+        else {
+            $("#tooltip").hide();
+        }
+    });
+    $("#u-{{bot}}").bind("plothover", function (event, pos, item) {
+        if(item) {
+            var x = item.datapoint[0].toFixed(2),
+                y = item.datapoint[1].toFixed(2),
+                d = new Date(parseInt(x, 10));
+            if(item.seriesIndex == 0) {
+                $("#tooltip").html(item.series.label + ": " + y + " " + d.toLocaleTimeString("en-us"))
+                    .css({ top: item.pageY + 5, left: item.pageX + 5, "background-color": "#ede7f6", border: "1px solid #311b92", })
+                    .fadeIn(200);
+            }
+        }
+        else {
+            $("#tooltip").hide();
+        }
+    });
+    $("#l-{{bot}}").bind("plothover", function (event, pos, item) {
+        if(item) {
+            var x = item.datapoint[0].toFixed(2),
+                y = item.datapoint[1].toFixed(2),
+                d = new Date(parseInt(x, 10));
+            if(item.seriesIndex == 0) {
+                $("#tooltip").html(item.series.label + ": " + y + " " + d.toLocaleTimeString("en-us"))
+                    .css({ top: item.pageY + 5, left: item.pageX + 5, "background-color": "#eceff1", border: "1px solid #263238", })
+                    .fadeIn(200);
+            }
+        }
+        else {
+            $("#tooltip").hide();
+        }
+    });
+});
+
+            </script>
+            {% endfor %}
+            <div class="panel panel-default">
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs">
+                    {% for bot, form in bot_forms.items %}
+                    {% if forloop.first %}
+                    <li class="active">
+                        {% else %}
+                    <li>
+                        {% endif %}
+                        <a href="#{{bot}}" data-toggle="tab" aria-expanded="true">{% if bot.name %}{{bot.name}}{% else %}{{bot.id}}{% endif %}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    {% for bot, form in bot_forms.items %}
+                    {% if forloop.first %}
+                    <div class="tab-pane fade active in" id="{{bot}}">
+                        {% else %}
+                        <div class="tab-pane fade" id="{{bot}}">
+                            {% endif %}
+                            <h4>&nbsp;<span id='date-{{ forloop.counter }}'></span></h4>
+                            <div class="btn-group btn-group-lg " role="group" aria-label="Large button group"
+                                 style="margin-left: 1em; margin-right: 1em;">
+                                <button type="button" id='6hour' class="btn btn-default">6 hours</button>
+                                <button type="button" id='12hour' class="btn btn-default">12 hours</button>
+                                <button type="button" id='24hour' class="btn btn-default">24 hours</button>
+                            </div>
+                            <br/>
+                            <br/>
+                            <div class="col-lg-12 col-centered">
+                                <div style="width:100%;height:300px" id="t-{{bot}}"></div>
+                                <hr>
+                                <div style="width:100%;height:300px" id="h-{{bot}}"></div>
+                                <hr>
+                                <div style="width:100%;height:300px" id="u-{{bot}}"></div>
+                                <hr>
+                                <div style="width:100%;height:300px" id="l-{{bot}}"></div>
+                                <br/>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <!-- /.panel-body -->
+                    <br/>
+                </div>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

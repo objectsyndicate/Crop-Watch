@@ -1,0 +1,345 @@
+{% extends "index.html" %}
+{% load addcss %}
+{% load tz %}
+{% block head %}
+<script src='/media/lib/moment.min.js'></script>
+<script src="/media/bootstrap-datetimepicker.js"></script>
+<link href="/media/bootstrap-datetimepicker.css" rel="stylesheet">
+<script>
+function copyToClipboardMsg(elem, msgElem) {
+    var succeed = copyToClipboard(elem);
+    var msg;
+    if (!succeed) {
+        msg = "Copy not supported or blocked.  Press Ctrl+c to copy."
+    } else {
+        msg = "Text copied to the clipboard."
+    }
+    if (typeof msgElem === "string") {
+        msgElem = document.getElementById(msgElem);
+    }
+    msgElem.innerHTML = msg;
+    setTimeout(function() {
+        msgElem.innerHTML = "";
+    }, 2000);
+}
+
+function copyToClipboard(elem) {
+    // create hidden text element, if it doesn't already exist
+    var targetId = "_hiddenCopyText_";
+    var isInput = elem.tagName === "INPUT" || elem.tagName === "TEXTAREA";
+    var origSelectionStart, origSelectionEnd;
+    if (isInput) {
+        // can just use the original source element for the selection and copy
+        target = elem;
+        origSelectionStart = elem.selectionStart;
+        origSelectionEnd = elem.selectionEnd;
+    } else {
+        // must use a temporary form element for the selection and copy
+        target = document.getElementById(targetId);
+        if (!target) {
+            var target = document.createElement("textarea");
+            target.style.position = "absolute";
+            target.style.left = "-9999px";
+            target.style.top = "0";
+            target.id = targetId;
+            document.body.appendChild(target);
+        }
+        target.textContent = elem.textContent;
+    }
+    // select the content
+    var currentFocus = document.activeElement;
+    target.focus();
+    target.setSelectionRange(0, target.value.length);
+    // copy the selection
+    var succeed;
+    try {
+        succeed = document.execCommand("copy");
+    } catch (e) {
+        succeed = false;
+    }
+    // restore original focus
+    if (currentFocus && typeof currentFocus.focus === "function") {
+        currentFocus.focus();
+    }
+    if (isInput) {
+        // restore prior selection
+        elem.setSelectionRange(origSelectionStart, origSelectionEnd);
+    } else {
+        // clear temporary content
+        target.textContent = "";
+    }
+    return succeed;
+}
+
+</script>
+<style>
+.panel-2 {
+color: #FFF;
+background-color: #263238;
+border-color: #000a12;
+}
+.panel-1 {
+color: #FFF;
+background-color: #4f5b62;
+border-color: #000a12;
+}
+.dl-horizontal dt{
+text-align: left;
+margin-bottom: 1em;
+width: auto;
+padding-right: 1em;
+}
+.dl-horizontal dd{
+margin-left: 0;
+margin-bottom: 1em;
+}
+</style>
+{% endblock %}
+{% block body %}
+<div class="container-fluid">
+    <h1 class="page-header">Devices</h1>
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="btn-group" role="group" aria-label="Large button group">
+                <a href="/device/add/" class="btn btn-outline btn-default" role="button">Add ioTank</a>
+                <a href="/media/Toolkit.zip" class="btn btn-outline btn-default" role="button">ioTank Toolkit (Windows
+                    7/8/10)</a>
+                <br>
+                <br>
+            </div>
+            <span id="msg"></span>
+        </div>
+        <div class="col-lg-9">
+            <div class="panel-group" id="accordion">
+                {% for luci, form in luci_forms.items %}
+                <div class="panel panel-{% if forloop.counter|divisibleby:2 %}1{% else %}2{% endif %}"
+                     style="margin-left: 1em; margin-right: 1em;">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <div class="panel-title pull-left">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{luci.id}}"
+                                   aria-expanded="false" class="collapsed">{% if luci.name %}{{luci.name}}'s{% else
+                                    %}{{luci.id}}{% endif %} Settings <i class="fa fa-gear"></i></a>
+                            </div>
+                            <div class="panel-title pull-right">
+                                Token: <span id='token{{luci.id}}'>{{luci.token}}</span>
+                                <button class="btn btn-default" id="copy{{luci.id}}">Copy</button>
+                            </div>
+                            <div class="clearfix"></div>
+                        </h4>
+                        <script>
+                        document.getElementById("copy{{luci.id}}").addEventListener("click", function() {
+                        copyToClipboardMsg(document.getElementById("token{{luci.id}}"), "msg");
+                        });
+                        </script>
+                    </div>
+                    <div id="collapse{{luci.id}}" class="panel-collapse collapse {% if forloop.first %} in {% endif %}"
+                         aria-expanded="false">
+                        <div class="panel-body">
+                            <form class="uniForm" id="edit-profile" method="POST" enctype="multipart/form-data"
+                                  action="/luciscan/{{luci.id}}">
+                                {% csrf_token %}
+                                <fieldset class="inlineLabels">
+                                    {{ form.non_field_errors }}
+                                    <div class="form-group">
+                                        {{ form.name.errors }}
+                                        <label for="{{ form.name.id_for_label }}">Lucican Name</label>
+                                        {{ form.name|addcss:"form-control" }}
+                                    </div>
+                                    <input class='btn btn-default' name="action" type="submit" value="Save"/>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-danger dropdown-toggle"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Delete <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <p style="margin-left: 1em; margin-right: 1em;" class="text-danger">This
+                                                    will delete all sensor data for this ioTank and can not be
+                                                    undone!</p>
+                                                <a href="/device/luci/delete/{{luci.id}}" class="btn btn-link"
+                                                   role="button">Confirm</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-warning dropdown-toggle"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Regenerate token <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <p style="margin-left: 1em; margin-right: 1em;" class="text-warning">
+                                                    This will regenerate the token for this ioTank, causing any in the
+                                                    field to stop working until you re-flash and can not be undone!</p>
+                                                <a href="/device/luci/regen/{{luci.id}}" class="btn btn-link"
+                                                   role="button">Confirm</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    Created on {{luci.created_at}}
+                                </fieldset>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="panel-group" id="accordion">
+                {% for bot, form in bot_forms.items %}
+                <div class="panel panel-{% if forloop.counter|divisibleby:2 %}1{% else %}2{% endif %}"
+                     style="margin-left: 1em; margin-right: 1em;">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <div class="panel-title pull-left">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{bot.id}}"
+                                   aria-expanded="false" class="collapsed">{% if bot.name %}{{bot.name}}'s{% else %}{{bot.id}}{% endif %} Settings <i class="fa fa-gear"></i></a>
+                            </div>
+                            <div class="panel-title pull-right">
+                                Token: <span id='token{{bot.id}}'>{{bot.token}}</span>
+                                <button class="btn btn-default" id="copy{{bot.id}}">Copy</button>
+                            </div>
+                            <div class="clearfix"></div>
+                        </h4>
+                        <script>
+document.getElementById("copy{{bot.id}}").addEventListener("click", function() {
+copyToClipboardMsg(document.getElementById("token{{bot.id}}"), "msg");
+});
+                        </script>
+                    </div>
+                    <div id="collapse{{bot.id}}" class="panel-collapse collapse {% if forloop.first %} in {% endif %}"
+                         aria-expanded="false">
+                        <div class="panel-body">
+                            <form class="uniForm" id="edit-profile" method="POST" enctype="multipart/form-data"
+                                  action="/iotank/{{bot.id}}">
+                                {% csrf_token %}
+                                <fieldset class="inlineLabels">
+                                    {{ form.non_field_errors }}
+                                    <div class="form-group">
+                                        {{ form.name.errors }}
+                                        <label for="{{ form.name.id_for_label }}">ioTank Name</label>
+                                        {{ form.name|addcss:"form-control" }}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.u.errors }}
+                                        <label for="{{ form.u.id_for_label }}">Temperature Unit</label>
+                                        {{ form.u|addcss:"form-control" }}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.m.errors }}
+                                        <label for="{{ form.m.id_for_label }}">Temp 1 (probe) Minimum</label>
+                                        {{ form.m|addcss:"form-control" }}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.x.errors }}
+                                        <label for="{{ form.x.id_for_label }}">Temp 1 (probe) Maximum</label>
+                                        {{ form.x|addcss:"form-control" }}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.m2.errors }}
+                                        <label for="{{ form.m2.id_for_label }}">Temp 2 (internal) Minimum</label>
+                                        {{ form.m2|addcss:"form-control" }}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.x2.errors }}
+                                        <label for="{{ form.x2.id_for_label }}">Temp 2 (internal) Maximum</label>
+                                        {{ form.x2|addcss:"form-control" }}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.mh.errors }}
+                                        <label for="{{ form.mh.id_for_label }}">Humidity Minimum</label>
+                                        {{ form.mh|addcss:"form-control" }}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.xh.errors }}
+                                        <label for="{{ form.xh.id_for_label }}">Humidity Maximum</label>
+                                        {{ form.xh|addcss:"form-control" }}
+                                    </div>
+                                    {% localtime on %}
+                                    <script type="text/javascript">
+$(function () {
+$('#night_start_{{bot.id}}').datetimepicker({format: 'HH:mm', });
+});
+
+
+
+                                    </script>
+                                    <div class="form-group control-label">
+                                        {{ form.night_start.errors }}
+                                        <label for="{{ form.night_start.id_for_label }}">Nighttime Start</label>
+                                        <div class='input-group date' id='night_start_{{bot.id}}'>
+                                            {{ form.night_start|addcss:"form-control" }}
+                                            <span class="input-group-addon">
+<span class="glyphicon glyphicon-time"></span>
+</span>
+                                        </div>
+                                    </div>
+                                    <script type="text/javascript">
+$(function () {
+$('#night_end_{{bot.id}}').datetimepicker({format: 'HH:mm', });
+});
+
+
+
+                                    </script>
+                                    <div class="form-group control-label">
+                                        {{ form.night_end.errors }}
+                                        <label for="{{ form.night_end.id_for_label }}">Nighttime End</label>
+                                        <div class='input-group date' id='night_end_{{bot.id}}'>
+                                            {{ form.night_end|addcss:"form-control" }}
+                                            <span class="input-group-addon">
+<span class="glyphicon glyphicon-time"></span>
+</span>
+                                        </div>
+                                    </div>
+                                    {% endlocaltime %}
+                                    <div class="form-group">
+                                        {{ form.night_max_light.errors }}
+                                        <label for="{{ form.night_max_light.id_for_label }}">Night Maximum Light</label>
+                                        {{ form.night_max_light|addcss:"form-control" }}
+                                    </div>
+                                    <div class="form-group">
+                                        {{ form.day_min_light.errors }}
+                                        <label for="{{ form.day_min_light.id_for_label }}">Day Minimum Light</label>
+                                        {{ form.day_min_light|addcss:"form-control" }}
+                                    </div>
+                                    <input class='btn btn-default' name="action" type="submit" value="Save"/>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-danger dropdown-toggle"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Delete <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <p style="margin-left: 1em; margin-right: 1em;" class="text-danger">This
+                                                    will delete all sensor data for this ioTank and can not be
+                                                    undone!</p>
+                                                <a href="/device/delete/{{bot.id}}" class="btn btn-link" role="button">Confirm</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-warning dropdown-toggle"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Regenerate token <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <p style="margin-left: 1em; margin-right: 1em;" class="text-warning">
+                                                    This will regenerate the token for this ioTank, causing any in the
+                                                    field to stop working until you re-flash and can not be undone!</p>
+                                                <a href="/device/regen/{{bot.id}}" class="btn btn-link" role="button">Confirm</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    Created on {{bot.created_at}}
+                                </fieldset>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endblock %}
