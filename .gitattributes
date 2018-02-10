@@ -1,2 +1,2 @@
 cropwatch/media/* linguist-vendored
-*.html linguist-language=django
+*.html linguist-language=JavaScript
