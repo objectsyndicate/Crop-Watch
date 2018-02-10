@@ -5,10 +5,6 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from timezone_field import TimeZoneField
 
-NOTICE_TYPE = (
-    ('S', 'SMS'),
-    ('E', 'E-mail'),
-)
 
 class Notice(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
