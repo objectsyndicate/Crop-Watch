@@ -1,1 +1,2 @@
 cropwatch/media/* linguist-vendored
+*.html linguist-language=Jinja
