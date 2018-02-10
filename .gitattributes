@@ -1,1 +1,2 @@
-*.html linguist-language=HTML+Django
+*.html linguist-language=django
+cropwatch/media/* linguist-vendored
