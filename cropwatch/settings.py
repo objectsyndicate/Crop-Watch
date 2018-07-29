@@ -33,7 +33,7 @@ except:
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "RQB1mR3+'6dvK+0B#3fjW$c8TC@r;oS6@5(2d'Mk*G;k6P.[]]|HTsC~9ZvkG\j"
+SECRET_KEY = "***"
 
 CELERY_RESULT_BACKEND = 'django-db'
 
