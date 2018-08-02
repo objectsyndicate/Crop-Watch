@@ -54,7 +54,6 @@ class MyAdaptor(BaseAdaptorField):
         self.obj.save()
 
 
-
 if sys.version_info[0] == 2:
     string = basestring
 else:

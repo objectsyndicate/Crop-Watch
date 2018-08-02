@@ -1,22 +1,19 @@
+from django.core.exceptions import ObjectDoesNotExist
+from django.utils.timezone import activate
 from rest_framework import parsers, renderers
+from rest_framework import serializers
+from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 
 from cropwatch.apps.metrics.models import *
-
-from django.core.exceptions import ObjectDoesNotExist
-from django.utils.timezone import activate
-from rest_framework import serializers
-from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
-
 from cropwatch.apps.metrics.permissions import IsBot
 from cropwatch.apps.metrics.tasks import *
-
 
 
 # Serializers define the API representation.
@@ -53,7 +50,6 @@ class ObtainAuthToken(APIView):
 obtain_auth_token = ObtainAuthToken.as_view()
 
 
-
 def is_night(now, start, end):
     if start <= end:
         return start <= now < end
@@ -77,9 +73,6 @@ class ioTankAddSerializer(serializers.Serializer):
     add = serializers.CharField(max_length=5)
 
     def validate_add(self, value):
-        """
-        Check that the blog post is about Django.
-        """
         if 'true' not in value.lower():
             raise serializers.ValidationError("add not true")
         return value
@@ -90,9 +83,6 @@ class ioTankDeleteSerializer(serializers.Serializer):
     uuid = serializers.UUIDField()
 
     def validate_delete(self, value):
-        """
-        Check that the blog post is about Django.
-        """
         if 'true' not in value.lower():
             raise serializers.ValidationError("delete not true")
         return value
@@ -102,9 +92,6 @@ class ioTankListSerializer(serializers.Serializer):
     list_tokens = serializers.CharField(max_length=5)
 
     def validate_list_tokens(self, value):
-        """
-        Check that the blog post is about Django.
-        """
         if 'true' not in value.lower():
             raise serializers.ValidationError("list_tokens not true")
         return value

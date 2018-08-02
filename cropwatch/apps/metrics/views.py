@@ -1,26 +1,23 @@
+import time
+from datetime import datetime, timedelta
 from smtplib import SMTPRecipientsRefused
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import password_reset, password_reset_confirm
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
-
-from rest_framework.authtoken.models import Token
-
-from cropwatch.apps.metrics.forms import *
-from cropwatch.settings import DEFAULT_FROM_EMAIL
-import time
-from datetime import datetime, timedelta
-
-from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.utils.timezone import activate
 from django_celery_results.models import TaskResult
+from rest_framework.authtoken.models import Token
 
+from cropwatch.apps.metrics.forms import *
 from cropwatch.apps.metrics.models import *
+from cropwatch.settings import DEFAULT_FROM_EMAIL
 
 
 def status(request):

@@ -55,9 +55,7 @@ class AccountSettings(models.Model):
         verbose_name_plural = 'Account Settings'
 
 
-
 from django.utils import timezone
-
 
 UNIT = (
     ('C', 'Celsius'),
@@ -90,7 +88,6 @@ class ioTank(models.Model):
     u = models.CharField(_('Temperature Unit'), max_length=1, default='F', choices=UNIT)
 
     name = models.CharField(max_length=100, blank=True, null=True, )
-
 
     def __str__(self):
         return str(self.id)

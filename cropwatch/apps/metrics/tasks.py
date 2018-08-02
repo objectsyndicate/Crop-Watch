@@ -7,6 +7,7 @@ from django.core.mail import send_mail
 from cropwatch.apps.metrics.models import AccountSettings, Notice
 from cropwatch.settings import DEFAULT_FROM_EMAIL
 
+
 @shared_task(bind=True)
 def send_email(self, subject, body, to, user):
     settings = AccountSettings.objects.get(user=user)

@@ -6,12 +6,16 @@ from cropwatch.apps.metrics.models import AccountSettings, Notice, ioTank, Senso
 class AccountSettingsAdmin(admin.ModelAdmin):
     pass
 
+
 admin.site.register(AccountSettings, AccountSettingsAdmin)
+
 
 class NoticeAdmin(admin.ModelAdmin):
     pass
 
+
 admin.site.register(Notice, NoticeAdmin)
+
 
 # Register your models here.
 class ioTankAdmin(admin.ModelAdmin):
