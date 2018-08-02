@@ -5,6 +5,10 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from timezone_field import TimeZoneField
 
+NOTICE_TYPE = (
+    ('I', 'ioTank Emergency'),
+)
+
 
 class Notice(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -22,10 +26,6 @@ class Notice(models.Model):
 
     def __unicode__(self):
         return str(self.taskid)
-
-NOTICE_TYPE = (
-    ('I', 'ioTank Emergency'),
-)
 
 
 class Notices(models.Model):
