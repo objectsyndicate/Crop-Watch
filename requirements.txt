@@ -1,0 +1,8 @@
+Django==1.11.1
+celery
+django-celery-results
+django-debug-toolbar
+django-rest-framework
+django-bootstrap3-datetimepicker
+django-timezone-field
+django-recurrence
