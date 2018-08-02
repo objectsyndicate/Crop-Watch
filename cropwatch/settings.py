@@ -16,10 +16,7 @@ DEBUG = True
 
 ADMINS = []
 
-
 LANGUAGE_CODE = 'en-us'
-
-
 
 # This is defined here as a do-nothing function because we can't import
 # django.utils.translation -- that module depends on the settings.
@@ -37,7 +34,6 @@ SECRET_KEY = "***"
 
 CELERY_RESULT_BACKEND = 'django-db'
 
-
 INTERNAL_IPS = ['127.0.0.1']
 
 ALLOWED_HOSTS = ['*']
@@ -53,7 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.gis',
+
     'django.contrib.sites',
 
     'cropwatch.apps.metrics',
@@ -100,13 +96,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'cropwatch.wsgi.application'
 
-
-
-SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.spatialite',
+        'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'Django.db',
         'USER': '',
         'PASSWORD': '',
@@ -120,7 +112,6 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -141,7 +132,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-
 
 STATIC_URL = '/assets/'
 STATIC_ROOT = BASE_DIR + '/cropwatch/assets/'
