@@ -1,5 +1,5 @@
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from smtplib import SMTPRecipientsRefused
 
 from django.contrib import messages
@@ -20,9 +20,9 @@ from cropwatch.apps.metrics.models import *
 from cropwatch.settings import DEFAULT_FROM_EMAIL
 
 
-def status(request):
-    status = '{ "status": "OK" }'
-    return HttpResponse(status, content_type='application/json')
+def status():
+    stat = '{ "status": "OK" }'
+    return HttpResponse(stat, content_type='application/json')
 
 
 @login_required
@@ -43,7 +43,7 @@ def base(request, form_class=ioTankForm):
 
 
 @login_required
-def ioTank_edit(request, uuid=None, form_class=ioTankForm, ):
+def iotank_edit(request, uuid=None, form_class=ioTankForm, ):
     bot = ioTank.objects.get(id=uuid)
     if request.method == "POST":
         if request.POST["action"] == "Save":
@@ -74,8 +74,7 @@ def notice(request):
 
 @login_required
 def flot_ajax(request, start, end, uuid):
-    settings = AccountSettings.objects.get(user=request.user)
-    tz = settings.timezone
+    data = ""
     # check if the incoming values are integers,
     try:
         int(start) and int(end)
@@ -225,10 +224,10 @@ def resetsent(request):
 @login_required
 def settings(request):
     errors = "NONE"
-    settings = AccountSettings.objects.get(user=request.user)
+    setting = AccountSettings.objects.get(user=request.user)
     user = User.objects.get(username=request.user)
     if request.method == 'POST':
-        upf = UserProfileForm(request.POST, instance=settings)
+        upf = UserProfileForm(request.POST, instance=setting)
         emailf = EmailForm(request.POST, instance=user)
         if upf.is_valid() and emailf.is_valid():
             try:
@@ -237,13 +236,13 @@ def settings(request):
                 emailf.save()
             except ValidationError as e:
                 errors = str(e.message)
-                upf = UserProfileForm(instance=settings)
+                upf = UserProfileForm(instance=setting)
                 emailf = EmailForm(instance=user)
         else:
-            upf = UserProfileForm(instance=settings)
+            upf = UserProfileForm(instance=setting)
             emailf = EmailForm(instance=user)
     else:
-        upf = UserProfileForm(instance=settings)
+        upf = UserProfileForm(instance=setting)
         emailf = EmailForm(instance=user)
     return render(request, 'settings.html', {'userprofileform': upf, 'email_form': emailf, 'errors': errors})
 
@@ -259,7 +258,8 @@ def register(request):
             print(uf.errors)
             print(upf.errors)
             if uf.is_valid() and upf.is_valid():
-                # this is a cheap way to verify e-mails are unique on signup. We can't reasonably edit the django user model now
+                # this is a cheap way to verify e-mails are unique on signup.
+                # We can't reasonably edit the django user model now
                 try:
                     user = uf.save(commit=False)
                     try:
