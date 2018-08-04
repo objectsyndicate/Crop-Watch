@@ -51,7 +51,7 @@ urlpatterns = [
 
                   # Metrics/scheduling/
                   url(r'^metrics/$', metrics_views.base, name="schedule"),
-                  url(r'^iotank/(?P<uuid>[^/]+)$', metrics_views.ioTank_edit, name="ioTank_edit"),
+                  url(r'^iotank/(?P<uuid>[^/]+)$', metrics_views.iotank_edit, name="ioTank_edit"),
 
                   # Notices
                   url(r'^notices/$', metrics_views.notice),
