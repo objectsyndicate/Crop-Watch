@@ -1,4 +1,4 @@
-Django==1.11.1
+Django==1.11.15
 celery
 django-celery-results
 django-debug-toolbar
