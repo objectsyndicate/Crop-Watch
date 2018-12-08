@@ -1,3 +1,3 @@
 *.html linguist-language=django
 cropwatch/media/* linguist-vendored
-cropwatch/media/fullcalendar-2.9.1/* linguist-generated=true
+cropwatch/templates/* linguist-vendored
